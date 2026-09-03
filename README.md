@@ -1,31 +1,47 @@
-# Panel Web ESIOS
+# Panel ESIOS
 
-Sitio estático compatible con GitHub Pages. Consulta directamente la API e·sios desde el navegador, representa los datos con Plotly y permite descargarlos en CSV o Excel.
+Aplicación web para consultar, visualizar, comparar y descargar series temporales de ESIOS.
 
-## Productos incluidos
+## Acceso al panel
 
-- Intradiario 1, indicador 600
-- Terciarias Subir, indicador 2197
-- Banda secundaria, indicador 2130
+[Acceder al Panel ESIOS](https://hectmg.github.io/Esios-Web/)
 
-## Publicación en GitHub Pages
+## Funcionalidades
 
-1. Crea un repositorio en GitHub.
-2. Copia en la raíz: `index.html`, `styles.css`, `app.js` y `.nojekyll`.
-3. Sube los archivos a la rama `main`.
-4. En `Settings > Pages`, selecciona `Deploy from a branch`, rama `main`, carpeta `/ (root)`.
-5. Abre la dirección que muestre GitHub Pages.
+- Selección de producto o indicador ESIOS.
+- Consulta por intervalo de fechas.
+- Rangos rápidos:
+  - Mes actual.
+  - Año actual.
+  - Año anterior.
+- Comparación de varias series.
+- Representación gráfica de los resultados.
+- Estadísticas de registros, media, mínimo y máximo.
+- Descarga de resultados en CSV.
+- Descarga de resultados en Excel.
+- Introducción directa del token de ESIOS desde el panel.
 
-## Uso local
+## Indicadores disponibles
 
-Para evitar restricciones de algunos navegadores al abrir ficheros con `file://`, sirve la carpeta localmente:
+El selector del panel permite consultar los productos e indicadores ESIOS configurados en la aplicación.
 
-```powershell
-python -m http.server 8000
-```
+## Uso
 
-Después abre `http://localhost:8000`.
+1. Seleccionar un producto.
+2. Indicar las fechas desde y hasta.
+3. Introducir el token de ESIOS.
+4. Pulsar **Consultar**.
+5. Visualizar la serie temporal y sus estadísticas.
+6. Descargar el resultado en CSV o Excel.
 
-## Token
+## Publicación
 
-El token está incluido en `app.js` y también puede editarse desde la interfaz. En GitHub Pages cualquier token incluido en JavaScript es público y visible para cualquier visitante.
+La aplicación está publicada mediante GitHub Pages desde la rama `main`.
+
+## Tecnología
+
+- HTML
+- CSS
+- JavaScript
+- API de ESIOS
+- GitHub Pages
