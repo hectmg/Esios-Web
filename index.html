@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#07111f" />
+  <title>Panel ESIOS</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <span class="eyebrow">API e·sios · REE</span>
+        <h1>Mercados eléctricos<br><span>en una sola vista</span></h1>
+        <p>Selecciona producto y fechas, consulta la API, visualiza la serie cuarto-horaria y descarga los datos.</p>
+      </div>
+      <div class="live-pill"><i></i><span>Consulta directa</span></div>
+    </header>
+
+    <section class="panel controls" aria-label="Controles de consulta">
+      <div class="product-grid" id="productGrid"></div>
+      <div class="date-grid">
+        <label>Desde<input id="startDate" type="date" /></label>
+        <label>Hasta<input id="endDate" type="date" /></label>
+        <label class="token-field">Token ESIOS<input id="token" type="text" autocomplete="off" /></label>
+        <button id="queryBtn" class="primary"><span>Consultar datos</span></button>
+      </div>
+      <div class="quick-row">
+        <span>Rangos rápidos</span>
+        <button data-range="month">Mes actual</button>
+        <button data-range="year">Año actual</button>
+        <button data-range="prevyear">Año anterior</button>
+        <button id="clearBtn">Limpiar</button>
+      </div>
+    </section>
+
+    <section id="status" class="status hidden" role="status"></section>
+
+    <section class="kpis" id="kpis">
+      <article><span>Registros</span><strong id="kpiRows">—</strong><small>observaciones</small></article>
+      <article><span>Media</span><strong id="kpiAvg">—</strong><small>EUR/MWh</small></article>
+      <article><span>Mínimo</span><strong id="kpiMin">—</strong><small>EUR/MWh</small></article>
+      <article><span>Máximo</span><strong id="kpiMax">—</strong><small>EUR/MWh</small></article>
+    </section>
+
+    <section class="panel chart-panel">
+      <div class="panel-head">
+        <div><small>SERIE TEMPORAL</small><h2 id="chartTitle">Selecciona un producto</h2></div>
+        <div class="actions">
+          <button id="csvBtn" disabled>Descargar CSV</button>
+          <button id="excelBtn" disabled>Descargar Excel</button>
+        </div>
+      </div>
+      <div id="chart" class="chart"><div class="empty"><b>Sin datos todavía</b><span>Configura el periodo y pulsa “Consultar datos”.</span></div></div>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-head"><div><small>VISTA PREVIA</small><h2>Datos normalizados</h2></div><span id="tableCount">0 filas</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Fecha y hora</th><th>Precio EUR/MWh</th><th>Sistema</th><th>Geo ID</th></tr></thead><tbody id="dataBody"><tr><td colspan="4" class="muted">No hay resultados.</td></tr></tbody></table></div>
+    </section>
+
+    <footer>Panel estático para GitHub Pages · Datos consultados directamente a la API e·sios</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
