@@ -1,21 +1,784 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panel ESIOS</title><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><style>
-:root{--bg:#06111e;--card:#0c1c2e;--line:#203a52;--txt:#eef8ff;--muted:#8ca6ba;--cyan:#30d7e9;--red:#ff7784;--green:#58d895}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 72% 0,#123a5b 0,transparent 32%),var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(1240px,calc(100% - 28px));margin:auto;padding:42px 0}.hero{display:flex;justify-content:space-between;align-items:end;gap:20px}.tag{display:inline-block;padding:6px 10px;border:1px solid #28617b;border-radius:99px;color:#7cebf5;background:#0b2938;font-size:12px;font-weight:800}.hero h1{font-size:clamp(38px,6vw,68px);line-height:1;margin:15px 0 8px;letter-spacing:-.055em}.hero h1 span{color:var(--cyan)}.hero p{color:var(--muted);max-width:680px;font-size:17px}.online{padding:12px 15px;border:1px solid var(--line);border-radius:14px;background:#0b1d2d}.online i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--green);margin-right:8px}.card{margin-top:18px;padding:20px;background:linear-gradient(145deg,#0e2237,#091725);border:1px solid var(--line);border-radius:21px;box-shadow:0 28px 80px #0005}.selector{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.prod{padding:14px;border:1px solid var(--line);border-radius:14px;background:#091827;color:var(--txt);cursor:pointer;text-align:left}.prod:hover,.prod.active{border-color:var(--cyan);background:#103249}.prod b,.prod small{display:block}.prod small{color:var(--muted)}.inputs{display:grid;grid-template-columns:1fr 1fr 1.4fr auto;gap:12px;margin-top:16px;align-items:end}label{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase}input{padding:12px;border:1px solid var(--line);border-radius:11px;background:#071421;color:var(--txt);font:inherit}.go{padding:13px 22px;border:0;border-radius:11px;background:linear-gradient(135deg,var(--cyan),#4ba8f2);font-weight:900;cursor:pointer}.go:disabled{opacity:.5}.quick{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;color:var(--muted)}button.alt{padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#10273c;color:#d0deea;cursor:pointer}.status{margin-top:15px;padding:12px 15px;border:1px solid var(--line);border-radius:12px;background:#0b2235}.status.error{border-color:#81394b;background:#311721;color:#ffc0c8}.status.ok{border-color:#2c684c;background:#102a20;color:#baf4d2}.hidden{display:none}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}.kpi{padding:17px;border:1px solid var(--line);border-radius:16px;background:#0b1b2b}.kpi span,.kpi small{display:block;color:var(--muted)}.kpi strong{display:block;font-size:25px;margin:5px 0}.head{display:flex;justify-content:space-between;align-items:center;gap:12px}.head h2{margin:4px 0}.head small{color:var(--cyan);font-weight:900;letter-spacing:.1em}.actions{display:flex;gap:8px}.chart{height:490px}.empty{height:100%;display:grid;place-content:center;text-align:center;color:var(--muted);border:1px dashed #2b4a64;border-radius:15px}.tablewrap{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:13px}table{width:100%;border-collapse:collapse}th,td{padding:10px 13px;border-bottom:1px solid #183149;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#10263d;color:#a7bdcf}.note{color:var(--muted);font-size:13px;margin-top:12px}@media(max-width:900px){.selector,.kpis{grid-template-columns:1fr 1fr}.inputs{grid-template-columns:1fr 1fr}.token{grid-column:1/-1}.hero{align-items:start;flex-direction:column}}@media(max-width:560px){.selector,.inputs,.kpis{grid-template-columns:1fr}.chart{height:360px}.head{align-items:start;flex-direction:column}.actions{width:100%}.actions button{flex:1}}
-</style></head><body><main class="wrap"><header class="hero"><div><span class="tag">API e·sios · REE</span><h1>Mercados eléctricos<br><span>en una sola vista</span></h1><p>Selecciona un producto o compáralos todos, elige el rango de fechas y descarga el resultado.</p></div><div class="online"><i></i>Consulta directa</div></header>
-<section class="card"><div id="selector" class="selector"></div><div class="inputs"><label>Desde<input id="start" type="date"></label><label>Hasta<input id="end" type="date"></label><label class="token">Token ESIOS<input id="token" type="text"></label><button id="query" class="go">Consultar</button></div><div class="quick"><span>Rangos:</span><button class="alt" data-range="month">Mes actual</button><button class="alt" data-range="year">Año actual</button><button class="alt" data-range="prev">Año anterior</button><button id="clear" class="alt">Limpiar</button></div></section>
-<div id="status" class="status hidden"></div><section class="kpis"><article class="kpi"><span>Registros</span><strong id="rows">—</strong><small>observaciones</small></article><article class="kpi"><span>Media</span><strong id="avg">—</strong><small>EUR/MWh</small></article><article class="kpi"><span>Mínimo</span><strong id="min">—</strong><small>EUR/MWh</small></article><article class="kpi"><span>Máximo</span><strong id="max">—</strong><small>EUR/MWh</small></article></section>
-<section class="card"><div class="head"><div><small>SERIE TEMPORAL</small><h2 id="title">Sin consulta</h2></div><div class="actions"><button id="csv" class="alt" disabled>CSV</button><button id="xlsx" class="alt" disabled>Excel</button></div></div><div id="chart" class="chart"><div class="empty">Selecciona producto y fechas, y pulsa Consultar.</div></div></section>
-<section class="card"><div class="head"><div><small>VISTA PREVIA</small><h2>Datos normalizados</h2></div><span id="count">0 filas</span></div><div class="tablewrap"><table><thead><tr><th>Producto</th><th>Fecha y hora</th><th>Precio EUR/MWh</th><th>Sistema</th><th>Geo ID</th></tr></thead><tbody id="body"><tr><td colspan="5">No hay resultados.</td></tr></tbody></table></div><p class="note">La tabla muestra como máximo 500 filas. Las descargas contienen todos los registros.</p></section></main>
-<script>
-const TOKEN_DEFAULT="95cb3b70361cd007ed14d59697f5afed4ab425708af1002577ef042dc1fc282b";
-const PRODUCTS=[{key:"intradiario_1",name:"Intradiario 1",id:600,color:"#30d7e9",spain:true},{key:"terciarias_subir",name:"Terciarias Subir",id:2197,color:"#ffba58",spain:false},{key:"banda_secundaria",name:"Banda secundaria",id:2130,color:"#a88cff",spain:false},{key:"todos",name:"Todos / Comparar",id:null,color:"#58d895",spain:false}];
-const S={product:PRODUCTS[0],rows:[]};const $=x=>document.getElementById(x),pad=n=>String(n).padStart(2,"0"),fmt=v=>Number.isFinite(v)?new Intl.NumberFormat("es-ES",{maximumFractionDigits:2}).format(v):"—";
-function dval(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}function renderSelector(){$("selector").innerHTML=PRODUCTS.map(p=>`<button class="prod ${p.key===S.product.key?'active':''}" data-key="${p.key}"><b>${p.name}</b><small>${p.id?`Indicador ${p.id}`:'Tres series'}</small></button>`).join("");document.querySelectorAll("[data-key]").forEach(b=>b.onclick=()=>{S.product=PRODUCTS.find(p=>p.key===b.dataset.key);renderSelector()})}
-function init(){const n=new Date();$("start").value=`${n.getFullYear()}-01-01`;$("end").value=dval(n);$("token").value=TOKEN_DEFAULT;renderSelector();$("query").onclick=query;$("clear").onclick=clear;$("csv").onclick=csv;$("xlsx").onclick=xlsx;document.querySelectorAll("[data-range]").forEach(b=>b.onclick=()=>range(b.dataset.range))}
-function range(t){const n=new Date();let a,b;if(t==="month"){a=new Date(n.getFullYear(),n.getMonth(),1);b=n}else if(t==="year"){a=new Date(n.getFullYear(),0,1);b=n}else{a=new Date(n.getFullYear()-1,0,1);b=new Date(n.getFullYear()-1,11,31)}$("start").value=dval(a);$("end").value=dval(b)}function status(t,c=""){$("status").textContent=t;$("status").className=`status ${c}`}
-function chunks(a,b){let s=new Date(a+"T00:00"),e=new Date(b+"T23:59"),o=[];while(s<=e){let z=new Date(s.getFullYear(),s.getMonth()+1,0,23,59),x=z<e?z:e;o.push([iso(s),iso(x)]);s=new Date(x);s.setMinutes(s.getMinutes()+1)}return o}function iso(d){return `${dval(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`}
-async function fetchOne(p,a,b,t){const u=new URL(`https://api.esios.ree.es/indicators/${p.id}`);u.searchParams.set("start_date",a);u.searchParams.set("end_date",b);u.searchParams.set("time_trunc","minutes15");const r=await fetch(u,{headers:{Accept:"application/json; application/vnd.esios-api-v1+json","Content-Type":"application/json","x-api-key":t}});if(!r.ok)throw Error(`${p.name}: HTTP ${r.status}`);const j=await r.json();if(!j.indicator||!Array.isArray(j.indicator.values))throw Error(`${p.name}: respuesta sin valores`);return norm(j.indicator.values,p)}
-function norm(v,p){let a=v;if(p.spain){const f=a.filter(r=>["españa","espana"].includes(String(r.geo_name||"").trim().toLowerCase()));if(f.length)a=f}const m=new Map();a.forEach(r=>{const d=new Date(r.datetime_utc||r.datetime),x=Number(r.value);if(!Number.isFinite(x)||isNaN(d))return;const k=`${p.key}|${d.toISOString()}|${r.geo_id??r.geo_name??''}`;m.set(k,{key:p.key,product:p.name,color:p.color,date:d,value:x,system:r.geo_name||"",geo:r.geo_id??""})});return [...m.values()]}
-async function query(){const a=$("start").value,b=$("end").value,t=$("token").value.trim();if(!a||!b||a>b)return status("Rango de fechas inválido.","error");if(!t)return status("Introduce el token.","error");const products=S.product.key==="todos"?PRODUCTS.slice(0,3):[S.product],btn=$("query");btn.disabled=true;btn.textContent="Consultando…";try{const out=[];for(const p of products){const cs=chunks(a,b);for(let i=0;i<cs.length;i++){status(`${p.name}: bloque ${i+1}/${cs.length}`);out.push(...await fetchOne(p,cs[i][0],cs[i][1],t))}}S.rows=out.sort((x,y)=>x.date-y.date);if(!S.rows.length)throw Error("Sin datos válidos");update();status(`Consulta completada: ${S.rows.length.toLocaleString("es-ES")} registros.`,"ok")}catch(e){console.error(e);status(`Error: ${e.message}`,"error")}finally{btn.disabled=false;btn.textContent="Consultar"}}
-function update(){const v=S.rows.map(r=>r.value);$("rows").textContent=v.length.toLocaleString("es-ES");$("avg").textContent=fmt(v.reduce((a,b)=>a+b,0)/v.length);$("min").textContent=fmt(Math.min(...v));$("max").textContent=fmt(Math.max(...v));$("title").textContent=`${S.product.name} · ${$("start").value} a ${$("end").value}`;const groups=Object.groupBy?Object.groupBy(S.rows,r=>r.key):S.rows.reduce((a,r)=>((a[r.key]??=[]).push(r),a),{});const traces=Object.values(groups).map(g=>({x:g.map(r=>r.date),y:g.map(r=>r.value),type:"scatter",mode:"lines",name:g[0].product,line:{color:g[0].color,width:1.5},hovertemplate:"%{x|%d/%m/%Y %H:%M}<br>%{y:.2f} EUR/MWh<extra>%{fullData.name}</extra>"}));Plotly.newPlot("chart",traces,{margin:{l:62,r:20,t:20,b:48},paper_bgcolor:"transparent",plot_bgcolor:"transparent",font:{color:"#9db4c7"},xaxis:{gridcolor:"#183149",rangeslider:{visible:true,thickness:.08}},yaxis:{title:"EUR/MWh",gridcolor:"#183149"},hovermode:"x unified"},{responsive:true,displaylogo:false});const show=S.rows.slice(0,500);$("body").innerHTML=show.map(r=>`<tr><td>${r.product}</td><td>${r.date.toLocaleString("es-ES")}</td><td>${fmt(r.value)}</td><td>${esc(r.system)}</td><td>${esc(r.geo)}</td></tr>`).join("");$("count").textContent=`${S.rows.length.toLocaleString("es-ES")} filas`;$("csv").disabled=$("xlsx").disabled=false}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}function flat(){return S.rows.map(r=>({Producto:r.product,FechaHora:r.date.toLocaleString("es-ES"),Precio_EUR_MWh:r.value,Sistema:r.system,GeoID:r.geo}))}function base(){return `ESIOS_${S.product.key.toUpperCase()}_${$("start").value}_${$("end").value}`}function csv(){const a=flat(),s=[Object.keys(a[0]).join(";"),...a.map(r=>Object.values(r).map(v=>`"${String(v).replaceAll('"','""')}"`).join(";"))].join("\n"),u=URL.createObjectURL(new Blob(["\ufeff"+s],{type:"text/csv"})),x=document.createElement("a");x.href=u;x.download=base()+".csv";x.click();URL.revokeObjectURL(u)}function xlsx(){const w=XLSX.utils.book_new();if(S.product.key==="todos"){for(const p of PRODUCTS.slice(0,3)){XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(flat().filter(r=>r.Producto===p.name)),p.name.slice(0,31))}}else XLSX.utils.book_append_sheet(w,XLSX.utils.json_to_sheet(flat()),S.product.name.slice(0,31));XLSX.writeFile(w,base()+".xlsx")}function clear(){S.rows=[];Plotly.purge("chart");$("chart").innerHTML='<div class="empty">Selecciona producto y fechas, y pulsa Consultar.</div>';["rows","avg","min","max"].forEach(x=>$(x).textContent="—");$("body").innerHTML='<tr><td colspan="5">No hay resultados.</td></tr>';$("csv").disabled=$("xlsx").disabled=true;$("status").className="hidden"}init();
-</script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel ESIOS</title>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --bg:#06111e;
+      --card:#0c1c2e;
+      --line:#203a52;
+      --txt:#eef8ff;
+      --muted:#8ca6ba;
+      --cyan:#30d7e9;
+      --red:#ff7784;
+      --green:#58d895;
+    }
+
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      background:radial-gradient(circle at 72% 0,#123a5b 0,transparent 32%),var(--bg);
+      color:var(--txt);
+      font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+    }
+
+    .wrap {
+      width:min(1240px,calc(100% - 28px));
+      margin:auto;
+      padding:42px 0;
+    }
+
+    .hero {
+      display:flex;
+      justify-content:space-between;
+      align-items:end;
+      gap:20px;
+    }
+
+    .tag {
+      display:inline-block;
+      padding:6px 10px;
+      border:1px solid #28617b;
+      border-radius:99px;
+      color:#7cebf5;
+      background:#0b2938;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .hero h1 {
+      font-size:clamp(38px,6vw,68px);
+      line-height:1;
+      margin:15px 0 8px;
+      letter-spacing:-.055em;
+    }
+
+    .hero h1 span { color:var(--cyan); }
+
+    .hero p {
+      color:var(--muted);
+      max-width:680px;
+      font-size:17px;
+    }
+
+    .online {
+      padding:12px 15px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#0b1d2d;
+    }
+
+    .online i {
+      display:inline-block;
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:var(--green);
+      margin-right:8px;
+    }
+
+    .card {
+      margin-top:18px;
+      padding:20px;
+      background:linear-gradient(145deg,#0e2237,#091725);
+      border:1px solid var(--line);
+      border-radius:21px;
+      box-shadow:0 28px 80px #0005;
+    }
+
+    .selector {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+    }
+
+    .prod {
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#091827;
+      color:var(--txt);
+      cursor:pointer;
+      text-align:left;
+    }
+
+    .prod:hover,
+    .prod.active {
+      border-color:var(--cyan);
+      background:#103249;
+    }
+
+    .prod b,
+    .prod small { display:block; }
+
+    .prod small { color:var(--muted); }
+
+    .inputs {
+      display:grid;
+      grid-template-columns:1fr 1fr 1.4fr auto;
+      gap:12px;
+      margin-top:16px;
+      align-items:end;
+    }
+
+    label {
+      display:grid;
+      gap:6px;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      text-transform:uppercase;
+    }
+
+    input {
+      min-width:0;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:#071421;
+      color:var(--txt);
+      font:inherit;
+    }
+
+    .go {
+      padding:13px 22px;
+      border:0;
+      border-radius:11px;
+      background:linear-gradient(135deg,var(--cyan),#4ba8f2);
+      color:#03131e;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .go:disabled { opacity:.5; }
+
+    .quick {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      margin-top:14px;
+      color:var(--muted);
+    }
+
+    button.alt {
+      padding:8px 11px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#10273c;
+      color:#d0deea;
+      cursor:pointer;
+    }
+
+    button.alt:disabled {
+      cursor:not-allowed;
+      opacity:.45;
+    }
+
+    .status {
+      margin-top:15px;
+      padding:12px 15px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#0b2235;
+    }
+
+    .status.error {
+      border-color:#81394b;
+      background:#311721;
+      color:#ffc0c8;
+    }
+
+    .status.ok {
+      border-color:#2c684c;
+      background:#102a20;
+      color:#baf4d2;
+    }
+
+    .hidden { display:none; }
+
+    .kpis {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .kpi {
+      padding:17px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#0b1b2b;
+    }
+
+    .kpi span,
+    .kpi small {
+      display:block;
+      color:var(--muted);
+    }
+
+    .kpi strong {
+      display:block;
+      font-size:25px;
+      margin:5px 0;
+    }
+
+    .head {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+
+    .head h2 { margin:4px 0; }
+
+    .head small {
+      color:var(--cyan);
+      font-weight:900;
+      letter-spacing:.1em;
+    }
+
+    .actions {
+      display:flex;
+      gap:8px;
+    }
+
+    .chart { height:490px; }
+
+    .empty {
+      height:100%;
+      display:grid;
+      place-content:center;
+      text-align:center;
+      color:var(--muted);
+      border:1px dashed #2b4a64;
+      border-radius:15px;
+    }
+
+    .tablewrap {
+      max-height:420px;
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:13px;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th,
+    td {
+      padding:10px 13px;
+      border-bottom:1px solid #183149;
+      text-align:left;
+      white-space:nowrap;
+    }
+
+    th {
+      position:sticky;
+      top:0;
+      background:#10263d;
+      color:#a7bdcf;
+      z-index:1;
+    }
+
+    .note {
+      color:var(--muted);
+      font-size:13px;
+      margin-top:12px;
+    }
+
+    @media (max-width:900px) {
+      .selector,
+      .kpis { grid-template-columns:1fr 1fr; }
+      .inputs { grid-template-columns:1fr 1fr; }
+      .token { grid-column:1/-1; }
+      .hero { align-items:start; flex-direction:column; }
+    }
+
+    @media (max-width:560px) {
+      .selector,
+      .inputs,
+      .kpis { grid-template-columns:1fr; }
+      .chart { height:360px; }
+      .head { align-items:start; flex-direction:column; }
+      .actions { width:100%; }
+      .actions button { flex:1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <div>
+        <span class="tag">API e·sios · REE</span>
+        <h1>Mercados eléctricos<br><span>en una sola vista</span></h1>
+        <p>Selecciona un producto o compáralos todos, elige el rango de fechas y descarga el resultado.</p>
+      </div>
+      <div class="online"><i></i>Consulta directa</div>
+    </header>
+
+    <section class="card">
+      <div id="selector" class="selector"></div>
+
+      <div class="inputs">
+        <label>
+          Desde
+          <input id="start" type="date">
+        </label>
+        <label>
+          Hasta
+          <input id="end" type="date">
+        </label>
+        <label class="token">
+          Token ESIOS
+          <input id="token" type="text">
+        </label>
+        <button id="query" class="go">Consultar</button>
+      </div>
+
+      <div class="quick">
+        <span>Rangos:</span>
+        <button class="alt" data-range="month">Mes actual</button>
+        <button class="alt" data-range="year">Año actual</button>
+        <button class="alt" data-range="prev">Año anterior</button>
+        <button id="clear" class="alt">Limpiar</button>
+      </div>
+    </section>
+
+    <div id="status" class="status hidden"></div>
+
+    <section class="kpis">
+      <article class="kpi">
+        <span>Registros</span>
+        <strong id="rows">—</strong>
+        <small>observaciones</small>
+      </article>
+      <article class="kpi">
+        <span>Media</span>
+        <strong id="avg">—</strong>
+        <small>EUR/MWh</small>
+      </article>
+      <article class="kpi">
+        <span>Mínimo</span>
+        <strong id="min">—</strong>
+        <small>EUR/MWh</small>
+      </article>
+      <article class="kpi">
+        <span>Máximo</span>
+        <strong id="max">—</strong>
+        <small>EUR/MWh</small>
+      </article>
+    </section>
+
+    <section class="card">
+      <div class="head">
+        <div>
+          <small>SERIE TEMPORAL</small>
+          <h2 id="title">Sin consulta</h2>
+        </div>
+        <div class="actions">
+          <button id="csv" class="alt" disabled>CSV</button>
+          <button id="xlsx" class="alt" disabled>Excel</button>
+        </div>
+      </div>
+      <div id="chart" class="chart">
+        <div class="empty">Selecciona producto y fechas, y pulsa Consultar.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="head">
+        <div>
+          <small>VISTA PREVIA</small>
+          <h2>Datos normalizados</h2>
+        </div>
+        <span id="count">0 filas</span>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Fecha y hora</th>
+              <th>Precio EUR/MWh</th>
+              <th>Sistema</th>
+              <th>Geo ID</th>
+            </tr>
+          </thead>
+          <tbody id="body">
+            <tr><td colspan="5">No hay resultados.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">La tabla muestra como máximo 500 filas. Las descargas contienen todos los registros.</p>
+    </section>
+  </main>
+
+  <script>
+    const TOKEN_DEFAULT = "95cb3b70361cd007ed14d59697f5afed4ab425708af1002577ef042dc1fc282b";
+
+    const PRODUCTS = [
+      { key:"intradiario_1", name:"Intradiario 1", id:600, color:"#30d7e9", spain:true },
+      { key:"intradiario_2", name:"Intradiario 2", id:601, color:"#4ba8f2", spain:true },
+      { key:"intradiario_3", name:"Intradiario 3", id:602, color:"#3978d4", spain:true },
+      { key:"terciarias_subir", name:"Terciarias Subir", id:2197, color:"#ffba58", spain:false },
+      { key:"terciarias_bajar", name:"Terciarias Bajar", id:2198, color:"#ff7784", spain:false },
+      { key:"banda_secundaria", name:"Banda secundaria", id:2130, color:"#a88cff", spain:false },
+      { key:"todos", name:"Todos / Comparar", id:null, color:"#58d895", spain:false }
+    ];
+
+    const REAL_PRODUCTS = PRODUCTS.filter(product => product.id !== null);
+    const S = { product:PRODUCTS[0], rows:[] };
+
+    const $ = id => document.getElementById(id);
+    const pad = number => String(number).padStart(2,"0");
+    const fmt = value => Number.isFinite(value)
+      ? new Intl.NumberFormat("es-ES", { maximumFractionDigits:2 }).format(value)
+      : "—";
+
+    function dateValue(date) {
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    function renderSelector() {
+      $("selector").innerHTML = PRODUCTS.map(product => `
+        <button class="prod ${product.key === S.product.key ? "active" : ""}" data-key="${product.key}">
+          <b>${product.name}</b>
+          <small>${product.id ? `Indicador ${product.id}` : `${REAL_PRODUCTS.length} series`}</small>
+        </button>
+      `).join("");
+
+      document.querySelectorAll("[data-key]").forEach(button => {
+        button.onclick = () => {
+          S.product = PRODUCTS.find(product => product.key === button.dataset.key);
+          renderSelector();
+        };
+      });
+    }
+
+    function init() {
+      const now = new Date();
+      $("start").value = `${now.getFullYear()}-01-01`;
+      $("end").value = dateValue(now);
+      $("token").value = TOKEN_DEFAULT;
+
+      renderSelector();
+
+      $("query").onclick = queryData;
+      $("clear").onclick = clearData;
+      $("csv").onclick = exportCsv;
+      $("xlsx").onclick = exportXlsx;
+
+      document.querySelectorAll("[data-range]").forEach(button => {
+        button.onclick = () => setRange(button.dataset.range);
+      });
+    }
+
+    function setRange(type) {
+      const now = new Date();
+      let start;
+      let end;
+
+      if (type === "month") {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end = now;
+      } else if (type === "year") {
+        start = new Date(now.getFullYear(), 0, 1);
+        end = now;
+      } else {
+        start = new Date(now.getFullYear() - 1, 0, 1);
+        end = new Date(now.getFullYear() - 1, 11, 31);
+      }
+
+      $("start").value = dateValue(start);
+      $("end").value = dateValue(end);
+    }
+
+    function setStatus(text, type="") {
+      $("status").textContent = text;
+      $("status").className = `status ${type}`;
+    }
+
+    function toIsoLocal(date) {
+      return `${dateValue(date)}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function createMonthlyChunks(startValue, endValue) {
+      let cursor = new Date(`${startValue}T00:00:00`);
+      const end = new Date(`${endValue}T23:59:59`);
+      const output = [];
+
+      while (cursor <= end) {
+        const monthEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0, 23, 59, 59);
+        const chunkEnd = monthEnd < end ? monthEnd : end;
+        output.push([toIsoLocal(cursor), toIsoLocal(chunkEnd)]);
+        cursor = new Date(chunkEnd);
+        cursor.setSeconds(cursor.getSeconds() + 1);
+      }
+
+      return output;
+    }
+
+    async function fetchProduct(product, start, end, token) {
+      const url = new URL(`https://api.esios.ree.es/indicators/${product.id}`);
+      url.searchParams.set("start_date", start);
+      url.searchParams.set("end_date", end);
+      url.searchParams.set("time_trunc", "minutes15");
+
+      const response = await fetch(url, {
+        headers: {
+          "Accept":"application/json; application/vnd.esios-api-v1+json",
+          "Content-Type":"application/json",
+          "x-api-key":token
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`${product.name}: HTTP ${response.status}`);
+      }
+
+      const json = await response.json();
+
+      if (!json.indicator || !Array.isArray(json.indicator.values)) {
+        throw new Error(`${product.name}: respuesta sin valores`);
+      }
+
+      return normalizeRows(json.indicator.values, product);
+    }
+
+    function normalizeRows(values, product) {
+      let selectedValues = values;
+
+      if (product.spain) {
+        const spanishValues = selectedValues.filter(row =>
+          ["españa", "espana"].includes(String(row.geo_name || "").trim().toLowerCase())
+        );
+        if (spanishValues.length) selectedValues = spanishValues;
+      }
+
+      const uniqueRows = new Map();
+
+      selectedValues.forEach(row => {
+        const date = new Date(row.datetime_utc || row.datetime);
+        const value = Number(row.value);
+
+        if (!Number.isFinite(value) || Number.isNaN(date.getTime())) return;
+
+        const key = `${product.key}|${date.toISOString()}|${row.geo_id ?? row.geo_name ?? ""}`;
+
+        uniqueRows.set(key, {
+          key:product.key,
+          product:product.name,
+          color:product.color,
+          date,
+          value,
+          system:row.geo_name || "",
+          geo:row.geo_id ?? ""
+        });
+      });
+
+      return [...uniqueRows.values()];
+    }
+
+    async function queryData() {
+      const start = $("start").value;
+      const end = $("end").value;
+      const token = $("token").value.trim();
+
+      if (!start || !end || start > end) {
+        setStatus("Rango de fechas inválido.", "error");
+        return;
+      }
+
+      if (!token) {
+        setStatus("Introduce el token.", "error");
+        return;
+      }
+
+      const selectedProducts = S.product.key === "todos" ? REAL_PRODUCTS : [S.product];
+      const queryButton = $("query");
+
+      queryButton.disabled = true;
+      queryButton.textContent = "Consultando…";
+
+      try {
+        const output = [];
+
+        for (const product of selectedProducts) {
+          const chunks = createMonthlyChunks(start, end);
+
+          for (let index = 0; index < chunks.length; index++) {
+            setStatus(`${product.name}: bloque ${index + 1}/${chunks.length}`);
+            const rows = await fetchProduct(product, chunks[index][0], chunks[index][1], token);
+            output.push(...rows);
+          }
+        }
+
+        S.rows = output.sort((left, right) => left.date - right.date);
+
+        if (!S.rows.length) throw new Error("Sin datos válidos");
+
+        updateView();
+        setStatus(`Consulta completada: ${S.rows.length.toLocaleString("es-ES")} registros.`, "ok");
+      } catch (error) {
+        console.error(error);
+        setStatus(`Error: ${error.message}`, "error");
+      } finally {
+        queryButton.disabled = false;
+        queryButton.textContent = "Consultar";
+      }
+    }
+
+    function groupRows(rows) {
+      return rows.reduce((groups, row) => {
+        (groups[row.key] ??= []).push(row);
+        return groups;
+      }, {});
+    }
+
+    function updateView() {
+      const values = S.rows.map(row => row.value);
+
+      $("rows").textContent = values.length.toLocaleString("es-ES");
+      $("avg").textContent = fmt(values.reduce((sum, value) => sum + value, 0) / values.length);
+      $("min").textContent = fmt(Math.min(...values));
+      $("max").textContent = fmt(Math.max(...values));
+      $("title").textContent = `${S.product.name} · ${$("start").value} a ${$("end").value}`;
+
+      const groups = groupRows(S.rows);
+      const traces = Object.values(groups).map(group => ({
+        x:group.map(row => row.date),
+        y:group.map(row => row.value),
+        type:"scatter",
+        mode:"lines",
+        name:group[0].product,
+        line:{ color:group[0].color, width:1.5 },
+        hovertemplate:"%{x|%d/%m/%Y %H:%M}<br>%{y:.2f} EUR/MWh<extra>%{fullData.name}</extra>"
+      }));
+
+      Plotly.newPlot("chart", traces, {
+        margin:{ l:62, r:20, t:20, b:48 },
+        paper_bgcolor:"transparent",
+        plot_bgcolor:"transparent",
+        font:{ color:"#9db4c7" },
+        xaxis:{ gridcolor:"#183149", rangeslider:{ visible:true, thickness:.08 } },
+        yaxis:{ title:"EUR/MWh", gridcolor:"#183149" },
+        hovermode:"x unified",
+        legend:{ orientation:"h", y:1.08 }
+      }, {
+        responsive:true,
+        displaylogo:false
+      });
+
+      const preview = S.rows.slice(0,500);
+      $("body").innerHTML = preview.map(row => `
+        <tr>
+          <td>${escapeHtml(row.product)}</td>
+          <td>${row.date.toLocaleString("es-ES")}</td>
+          <td>${fmt(row.value)}</td>
+          <td>${escapeHtml(row.system)}</td>
+          <td>${escapeHtml(row.geo)}</td>
+        </tr>
+      `).join("");
+
+      $("count").textContent = `${S.rows.length.toLocaleString("es-ES")} filas`;
+      $("csv").disabled = false;
+      $("xlsx").disabled = false;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        "\"":"&quot;",
+        "'":"&#39;"
+      })[character]);
+    }
+
+    function flatRows(rows=S.rows) {
+      return rows.map(row => ({
+        Producto:row.product,
+        FechaHora:row.date.toLocaleString("es-ES"),
+        Precio_EUR_MWh:row.value,
+        Sistema:row.system,
+        GeoID:row.geo
+      }));
+    }
+
+    function fileBase() {
+      return `ESIOS_${S.product.key.toUpperCase()}_${$("start").value}_${$("end").value}`;
+    }
+
+    function exportCsv() {
+      if (!S.rows.length) return;
+
+      const rows = flatRows();
+      const header = Object.keys(rows[0]).join(";");
+      const body = rows.map(row =>
+        Object.values(row).map(value => `"${String(value).replaceAll('"','""')}"`).join(";")
+      );
+      const content = [header, ...body].join("\n");
+      const url = URL.createObjectURL(new Blob(["\ufeff" + content], { type:"text/csv;charset=utf-8" }));
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `${fileBase()}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportXlsx() {
+      if (!S.rows.length) return;
+
+      const workbook = XLSX.utils.book_new();
+
+      if (S.product.key === "todos") {
+        for (const product of REAL_PRODUCTS) {
+          const productRows = S.rows.filter(row => row.key === product.key);
+          if (!productRows.length) continue;
+
+          XLSX.utils.book_append_sheet(
+            workbook,
+            XLSX.utils.json_to_sheet(flatRows(productRows)),
+            product.name.slice(0,31)
+          );
+        }
+      } else {
+        XLSX.utils.book_append_sheet(
+          workbook,
+          XLSX.utils.json_to_sheet(flatRows()),
+          S.product.name.slice(0,31)
+        );
+      }
+
+      XLSX.writeFile(workbook, `${fileBase()}.xlsx`);
+    }
+
+    function clearData() {
+      S.rows = [];
+      Plotly.purge("chart");
+      $("chart").innerHTML = '<div class="empty">Selecciona producto y fechas, y pulsa Consultar.</div>';
+      $("title").textContent = "Sin consulta";
+      ["rows", "avg", "min", "max"].forEach(id => $(id).textContent = "—");
+      $("body").innerHTML = '<tr><td colspan="5">No hay resultados.</td></tr>';
+      $("count").textContent = "0 filas";
+      $("csv").disabled = true;
+      $("xlsx").disabled = true;
+      $("status").className = "hidden";
+    }
+
+    init();
+  </script>
+</body>
+</html>
